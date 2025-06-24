@@ -1,0 +1,12 @@
+<h1>Your Resumes</h1>
+<a href="{% url 'upload_resume' %}">Upload New Resume</a>
+<ul>
+    {% for resume in resumes %}
+    <li>
+        <a href="{% url 'resume_detail' resume.pk %}">{{ resume.title }}</a>
+        - <a href="{{ resume.document.url }}">Download</a>
+    </li>
+    {% empty %}
+    <li>No resumes uploaded yet.</li>
+    {% endfor %}
+</ul>

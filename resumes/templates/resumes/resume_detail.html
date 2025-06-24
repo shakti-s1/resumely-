@@ -1,0 +1,7 @@
+<h1>{{ resume.title }}</h1>
+<p>Uploaded: {{ resume.created_at }}</p>
+<a href="{{ resume.document.url }}">Download Resume</a>
+<br>
+<a href="{% url 'resume_list' %}">Back to list</a>
+<a href="{% url 'edit_resume' resume.pk %}">Edit Resume</a>
+<a href="{% url 'delete_resume' resume.pk %}">Delete Resume</a>
