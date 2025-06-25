@@ -1,3 +1,6 @@
+{% extends "resumes/base.html" %}
+
+{% block content %}
 <h1>Your Resumes</h1>
 <a href="{% url 'upload_resume' %}">Upload New Resume</a>
 <ul>
@@ -10,3 +13,4 @@
     <li>No resumes uploaded yet.</li>
     {% endfor %}
 </ul>
+{% endblock %}

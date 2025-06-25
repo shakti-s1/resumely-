@@ -61,6 +61,10 @@ def edit_resume(request, pk):
 def delete_resume(request, pk):
     resume = get_object_or_404(Resume, pk=pk, user=request.user)
     if request.method == 'POST':
+        # Delete the file from storage
+        if resume.document:
+            resume.document.delete(save=False)
+        # Delete the database record
         resume.delete()
         return redirect('resume_list')
     return render(request, 'resumes/delete_resume.html', {'resume': resume})

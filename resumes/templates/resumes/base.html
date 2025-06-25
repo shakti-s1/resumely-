@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Resumely</title>
+    <!-- You can add Bootstrap or custom CSS here later -->
+</head>
+
+<body>
+    <!-- Messages block for alerts -->
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+            {% endfor %}
+    </ul>
+    {% endif %}
+
+    <!-- Main content block -->
+    {% block content %}
+    {% endblock %}
+</body>
+
+</html>
