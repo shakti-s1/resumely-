@@ -19,12 +19,30 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
+from django.views.defaults import page_not_found
+
+
+def custom_404(request, exception):
+    return page_not_found(request, exception, template_name='404.html')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),  # Only auth here!
+    # Only resumes here!
     path('resumes/', include('resumes.urls')),
-    path('accounts/', include('resumes.urls')),
+    # Redirect accounts/profile/ to our profile view
+    path('accounts/profile/', lambda request: redirect('profile'),
+         name='profile_redirect'),
     path('', lambda request: redirect('resume_list'), name='home'),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Add static and media files serving
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL,
+                          document_root=settings.STATIC_ROOT)
+
+# Custom 404 handler
+handler404 = 'resumely.urls.custom_404'

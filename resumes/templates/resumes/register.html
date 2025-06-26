@@ -1,11 +1,111 @@
 {% extends "resumes/base.html" %}
+{% load custom_filters %}
+
+{% block title %}Register - Resumely{% endblock %}
 
 {% block content %}
-<h2>Register</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
-<a href="{% url 'login' %}">Already have an account? Login</a>
+<div class="container mt-5 slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card register-card">
+                <div class="card-header text-center">
+                    <div class="register-icon mb-3">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <h2 class="mb-0">Join Resumely</h2>
+                    <p class="text-white-50 mb-0">Create your account to get started</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" class="register-form">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="form-floating mb-3">
+                            {{ field|addclass:"form-control" }}
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {% if field.errors %}
+                            <div class="text-danger mt-1">
+                                <small>
+                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                    {% for error in field.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% if field.help_text %}
+                            <div class="form-text mt-1">
+                                <i class="bi bi-info-circle me-1"></i>{{ field.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>Create Account
+                            </button>
+                        </div>
+                    </form>
+                    <div class="text-center">
+                        <p class="text-muted mb-0">Already have an account?</p>
+                        <a href="{% url 'login' %}" class="btn btn-link text-decoration-none">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-card {
+        border: none;
+        box-shadow: var(--shadow-lg);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .register-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .form-floating>.form-control {
+        padding: 1rem 0.75rem;
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
+
+    .form-floating>label {
+        padding: 1rem 0.75rem;
+    }
+
+    .form-floating>.form-control:focus~label,
+    .form-floating>.form-control:not(:placeholder-shown)~label {
+        opacity: 0.65;
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    }
+
+    .btn-link {
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .btn-link:hover {
+        color: var(--primary-dark);
+    }
+
+    .form-text {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+</style>
 {% endblock %}

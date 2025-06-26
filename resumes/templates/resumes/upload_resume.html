@@ -1,11 +1,196 @@
 {% extends "resumes/base.html" %}
+{% load custom_filters %}
+
+{% block title %}Upload Resume - Resumely{% endblock %}
 
 {% block content %}
-<h1>Upload Resume</h1>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Upload</button>
-</form>
-<a href="{% url 'resume_list' %}">Back to list</a>
+<div class="container mt-5 slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card upload-card">
+                <div class="card-header text-center">
+                    <div class="upload-icon mb-3">
+                        <i class="bi bi-cloud-upload"></i>
+                    </div>
+                    <h2 class="mb-0">Upload Resume</h2>
+                    <p class="text-white-50 mb-0">Add your resume for AI-powered analysis</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" class="upload-form">
+                        {% csrf_token %}
+                        <!-- Resume Name Field -->
+                        <div class="form-group mb-4">
+                            <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.title.label }}
+                            </label>
+                            {{ form.title|addclass:"form-control" }}
+                            {% if form.title.errors %}
+                            <div class="text-danger mt-2">
+                                <small>
+                                    {% for error in form.title.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% if form.title.help_text %}
+                            <div class="form-text mt-2">
+                                {{ form.title.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Resume File Field -->
+                        <div class="form-group mb-4">
+                            <label for="{{ form.document.id_for_label }}" class="form-label fw-semibold">
+                                {{ form.document.label }}
+                            </label>
+                            <div class="file-upload-area">
+                                {{ form.document|addclass:"form-control file-input" }}
+                                <div class="file-upload-overlay">
+                                    <i class="bi bi-cloud-upload fs-1 text-muted"></i>
+                                    <p class="text-muted mt-2">Click to browse or drag and drop</p>
+                                    <small class="text-muted">Supports PDF, DOCX (Max 5MB)</small>
+                                </div>
+                            </div>
+                            {% if form.document.errors %}
+                            <div class="text-danger mt-2">
+                                <small>
+                                    {% for error in form.document.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% if form.document.help_text %}
+                            <div class="form-text mt-2">
+                                {{ form.document.help_text }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="d-grid gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-cloud-upload me-2"></i>Upload & Analyze
+                            </button>
+                            <a href="{% url 'resume_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .upload-card {
+        border: none;
+        box-shadow: var(--shadow-lg);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .upload-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .file-upload-area {
+        position: relative;
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .file-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .file-upload-overlay {
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .file-input:focus+.file-upload-overlay {
+        color: var(--primary-color);
+    }
+
+    .form-label {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-text {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.querySelector('.file-input');
+        const uploadArea = document.querySelector('.file-upload-area');
+        const overlay = document.querySelector('.file-upload-overlay');
+
+        if (fileInput && uploadArea && overlay) {
+            fileInput.addEventListener('change', function () {
+                if (this.files.length > 0) {
+                    const fileName = this.files[0].name;
+                    overlay.innerHTML = `
+                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                    <p class="text-success mt-2 fw-semibold">${fileName}</p>
+                    <small class="text-muted">File selected successfully</small>
+                `;
+                    uploadArea.style.borderColor = 'var(--success-color)';
+                    uploadArea.style.background = 'rgba(16, 185, 129, 0.05)';
+                }
+            });
+
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--primary-color)';
+                this.style.background = 'rgba(99, 102, 241, 0.1)';
+            });
+
+            uploadArea.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--border-color)';
+                this.style.background = '#f8fafc';
+            });
+
+            uploadArea.addEventListener('drop', function (e) {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

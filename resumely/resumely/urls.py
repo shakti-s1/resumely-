@@ -22,6 +22,8 @@ from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),  # Only auth here!
+    # Only resumes here!
     path('resumes/', include('resumes.urls')),
     path('', lambda request: redirect('resume_list'), name='home'),
 ]

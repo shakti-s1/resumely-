@@ -1,11 +1,174 @@
 {% extends "resumes/base.html" %}
+{% load custom_filters %}
+
+{% block title %}Resume Details - Resumely{% endblock %}
 
 {% block content %}
-<h1>{{ resume.title }}</h1>
-<p>Uploaded: {{ resume.created_at }}</p>
-<a href="{{ resume.document.url }}">Download Resume</a>
-<br>
-<a href="{% url 'resume_list' %}">Back to list</a>
-<a href="{% url 'edit_resume' resume.pk %}">Edit Resume</a>
-<a href="{% url 'delete_resume' resume.pk %}">Delete Resume</a>
+<div class="container mt-5 slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h2 class="mb-0">{{ resume.title }}</h2>
+                    <div>
+                        <a href="{{ resume.document.url }}" class="btn btn-outline-success btn-sm" target="_blank">
+                            <i class="bi bi-download me-1"></i>Download
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <span class="text-muted">Uploaded:</span> {{ resume.created_at|date:"M d, Y H:i" }}
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        <a href="{% url 'resume_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                        </a>
+                        <a href="{% url 'edit_resume' resume.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil me-1"></i>Edit Resume
+                        </a>
+                        <a href="{% url 'delete_resume' resume.pk %}" class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-1"></i>Delete Resume
+                        </a>
+                    </div>
+                    <hr>
+                    <!-- AI Feedback Section -->
+                    <div class="mt-5">
+                        <h3 class="mb-3">AI Resume Feedback <span title="What is this?" style="cursor:help;">🤖</span>
+                        </h3>
+                        <p class="text-muted">Our AI analyzes your resume and provides section-wise suggestions,
+                            rewrites, and ATS checks. Use the feedback to improve your resume instantly!</p>
+                        {% if resume.ai_feedback and resume.ai_feedback.items %}
+                        {% if resume.ai_feedback.error %}
+                        <div class="alert alert-warning">AI feedback could not be generated: {{ resume.ai_feedback.error
+                            }}</div>
+                        {% if resume.ai_feedback.raw_response %}
+                        <pre class="bg-light p-2">{{ resume.ai_feedback.raw_response }}</pre>
+                        {% endif %}
+                        {% else %}
+                        <div class="accordion" id="aiFeedbackAccordion">
+                            {% for section in sections %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-{{ section }}">
+                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}"
+                                        type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ section }}"
+                                        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                                        aria-controls="collapse-{{ section }}">
+                                        {{ section|title|replace_underscores }}
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ section }}"
+                                    class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                                    aria-labelledby="heading-{{ section }}" data-bs-parent="#aiFeedbackAccordion">
+                                    <div class="accordion-body">
+                                        {% with feedback=resume.ai_feedback|get_item:section %}
+                                        {% if feedback %}
+                                        <!-- Suggestions -->
+                                        <div class="mb-3">
+                                            <span class="fw-bold">💡 Suggestions:</span>
+                                            {% if feedback.suggestions and feedback.suggestions|length > 0 %}
+                                            <ul>
+                                                {% for suggestion in feedback.suggestions %}
+                                                <li>{{ suggestion }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% else %}
+                                            <span class="text-muted">No suggestions.</span>
+                                            {% endif %}
+                                        </div>
+                                        <!-- Rewrites -->
+                                        <div class="mb-3">
+                                            <span class="fw-bold">✍️ Rewrites:</span>
+                                            {% if feedback.rewrites and feedback.rewrites|length > 0 %}
+                                            <ul class="list-group">
+                                                {% for rewrite in feedback.rewrites %}
+                                                <li
+                                                    class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span class="text-muted">Original:</span> {{
+                                                        rewrite.original|default:'—' }}<br>
+                                                        <span class="text-success">Improved:</span> <span
+                                                            class="improved-bullet">{{ rewrite.improved|default:rewrite
+                                                            }}</span>
+                                                    </div>
+                                                    <button class="btn btn-outline-secondary btn-sm ms-2 copy-btn"
+                                                        data-bullet="{{ rewrite.improved|default:rewrite }}"
+                                                        title="Copy improved bullet">Copy</button>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% else %}
+                                            <span class="text-muted">No rewrites.</span>
+                                            {% endif %}
+                                        </div>
+                                        <!-- ATS Check -->
+                                        <div class="mb-3">
+                                            <span class="fw-bold">🛡️ ATS Check:</span>
+                                            {% if feedback.ats_check and feedback.ats_check|length > 0 %}
+                                            <ul>
+                                                {% for ats in feedback.ats_check %}
+                                                <li>
+                                                    {% if 'missing' in ats|lower or 'issue' in ats|lower or 'error' in
+                                                    ats|lower %}
+                                                    <span class="badge bg-warning text-dark">⚠️</span>
+                                                    {% else %}
+                                                    <span class="badge bg-success">✔️</span>
+                                                    {% endif %}
+                                                    {{ ats }}
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% else %}
+                                            <span class="text-muted">No ATS issues found.</span>
+                                            {% endif %}
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted">No feedback for this section.</span>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="alert alert-info">No AI feedback available for this resume yet.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Copy to clipboard script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.copy-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const text = btn.getAttribute('data-bullet');
+                navigator.clipboard.writeText(text);
+                btn.textContent = 'Copied!';
+                setTimeout(() => { btn.textContent = 'Copy'; }, 1200);
+            });
+        });
+    });
+</script>
+
+<style>
+    .accordion-button {
+        font-size: 1.1rem;
+    }
+
+    .list-group-item {
+        background: #f9f9f9;
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .improved-bullet {
+        font-weight: 500;
+    }
+</style>
 {% endblock %}

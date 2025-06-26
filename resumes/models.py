@@ -10,6 +10,8 @@ class Resume(models.Model):
     text_content = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    ai_feedback = models.JSONField(null=True, blank=True,
+                                   help_text="Structured AI feedback for this resume.")
 
     def __str__(self):
         return f"{self.title} ({self.user.username})"

@@ -1,3 +1,231 @@
-<h1>User Profile</h1>
-<p>Welcome, {{ user.username }}!</p>
-<a href="{% url 'resume_list' %}">Go to your resumes</a>
+{% extends "resumes/base.html" %}
+
+{% block title %}Profile - Resumely{% endblock %}
+
+{% block content %}
+<div class="container mt-5 slide-up">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card profile-card">
+                <div class="card-header text-center">
+                    <div class="profile-avatar mb-3">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <h2 class="mb-0">User Profile</h2>
+                    <p class="text-white-50 mb-0">Manage your account and view statistics</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="profile-section">
+                                <h5 class="section-title">
+                                    <i class="bi bi-person me-2"></i>Account Information
+                                </h5>
+                                <div class="info-list">
+                                    <div class="info-item">
+                                        <span class="info-label">Username:</span>
+                                        <span class="info-value">{{ user.username }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Email:</span>
+                                        <span class="info-value">{{ user.email|default:"Not provided" }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Date Joined:</span>
+                                        <span class="info-value">{{ user.date_joined|date:"M d, Y" }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Last Login:</span>
+                                        <span class="info-value">{% if user.last_login %}{{ user.last_login|date:"M d, Y
+                                            H:i" }}{% else %}Never{% endif %}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="profile-section">
+                                <h5 class="section-title">
+                                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                                </h5>
+                                <div class="action-buttons">
+                                    <a href="{% url 'resume_list' %}" class="btn btn-primary w-100 mb-3">
+                                        <i class="bi bi-file-earmark-text me-2"></i>View My Resumes
+                                    </a>
+                                    <a href="{% url 'upload_resume' %}" class="btn btn-success w-100 mb-3">
+                                        <i class="bi bi-plus-circle me-2"></i>Upload New Resume
+                                    </a>
+                                    <a href="{% url 'logout' %}" class="btn btn-outline-danger w-100">
+                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Section -->
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <h5 class="section-title">
+                                <i class="bi bi-graph-up me-2"></i>Your Statistics
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="stat-card text-center">
+                                        <div class="stat-icon mx-auto mb-2">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ user.resumes.count }}</h3>
+                                            <p class="stat-label">Total Resumes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card text-center">
+                                        <div class="stat-icon mx-auto mb-2">
+                                            <i class="bi bi-check-circle"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ user.resumes.all|dictsort:"ai_feedback"|length }}
+                                            </h3>
+                                            <p class="stat-label">AI Analyzed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card text-center">
+                                        <div class="stat-icon mx-auto mb-2">
+                                            <i class="bi bi-calendar3"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ user.date_joined|timesince }}</h3>
+                                            <p class="stat-label">Member Since</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-card {
+        border: none;
+        box-shadow: var(--shadow-lg);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 3rem;
+        color: white;
+    }
+
+    .profile-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        height: 100%;
+    }
+
+    .section-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}

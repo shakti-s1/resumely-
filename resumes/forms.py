@@ -8,6 +8,14 @@ class ResumeForm(forms.ModelForm):
     class Meta:
         model = Resume
         fields = ['title', 'document']
+        labels = {
+            'title': 'Resume Name',
+            'document': 'Resume File',
+        }
+        help_texts = {
+            'title': 'Give your resume a name to help you identify it (e.g., "Google SWE Resume").',
+            'document': 'Upload your resume file (PDF or DOCX, max 5MB).',
+        }
 
     def clean_document(self):
         document = self.cleaned_data.get('document')

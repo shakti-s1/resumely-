@@ -1,0 +1,29 @@
+/* Custom CSS for Resumely */
+/* This file ensures static files are working properly */
+
+.custom-footer {
+    margin-top: 2rem;
+    padding: 1rem 0;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Additional utility classes */
+.text-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-custom {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
