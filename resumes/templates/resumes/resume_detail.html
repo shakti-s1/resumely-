@@ -30,6 +30,11 @@
                         <a href="{% url 'delete_resume' resume.pk %}" class="btn btn-outline-danger">
                             <i class="bi bi-trash me-1"></i>Delete Resume
                         </a>
+                        {% if resume.text_content %}
+                        <a href="{% url 'regenerate_ai_feedback' resume.pk %}" class="btn btn-outline-info">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Regenerate AI Feedback
+                        </a>
+                        {% endif %}
                     </div>
                     <hr>
                     <!-- AI Feedback Section -->

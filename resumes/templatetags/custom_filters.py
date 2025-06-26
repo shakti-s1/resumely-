@@ -16,3 +16,11 @@ def addclass(field, css_class):
     if isinstance(field, BoundField):
         return field.as_widget(attrs={'class': css_class})
     return field
+
+
+@register.filter
+def get_item(dictionary, key):
+    """Get an item from a dictionary by key."""
+    if dictionary and isinstance(dictionary, dict):
+        return dictionary.get(key)
+    return None

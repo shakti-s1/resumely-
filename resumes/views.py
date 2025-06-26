@@ -27,23 +27,55 @@ def upload_resume(request):
     if request.method == 'POST':
         form = ResumeForm(request.POST, request.FILES)
         if form.is_valid():
-            resume = form.save(commit=False)
-            resume.user = request.user
-            # Extract text from the uploaded file
-            resume.text_content = extract_text_from_resume(resume.document)
-            # Analyze with Gemini and store feedback
-            ai_feedback = analyze_resume_with_gemini(resume.text_content)
-            resume.ai_feedback = ai_feedback
-            resume.save()
-            if 'error' in ai_feedback:
-                messages.warning(request, "Resume uploaded, but AI feedback could not be generated: {}".format(
-                    ai_feedback.get('error')))
-            else:
-                messages.success(
-                    request, "Resume uploaded and analyzed successfully!")
-            return redirect('resume_list')
+            try:
+                resume = form.save(commit=False)
+                resume.user = request.user
+
+                # Extract text from the uploaded file
+                try:
+                    resume.text_content = extract_text_from_resume(
+                        resume.document)
+                    if not resume.text_content.strip():
+                        messages.warning(
+                            request, "Resume uploaded, but no text could be extracted. Please ensure your file contains readable text.")
+                        resume.save()
+                        return redirect('resume_list')
+                except Exception as e:
+                    messages.error(
+                        request, f"Failed to extract text from resume: {str(e)}")
+                    return render(request, 'resumes/upload_resume.html', {'form': form})
+
+                # Analyze with Gemini and store feedback
+                try:
+                    ai_feedback = analyze_resume_with_gemini(
+                        resume.text_content)
+                    resume.ai_feedback = ai_feedback
+
+                    if 'error' in ai_feedback:
+                        messages.warning(
+                            request, f"Resume uploaded successfully, but AI analysis failed: {ai_feedback.get('error')}")
+                        if ai_feedback.get('raw_response'):
+                            # Still save the resume but with error info
+                            resume.ai_feedback = ai_feedback
+                    else:
+                        messages.success(
+                            request, "Resume uploaded and analyzed successfully! Check the AI feedback for improvement suggestions.")
+
+                except Exception as e:
+                    messages.warning(
+                        request, f"Resume uploaded successfully, but AI analysis encountered an error: {str(e)}")
+                    resume.ai_feedback = {
+                        'error': f'Analysis failed: {str(e)}'}
+
+                resume.save()
+                return redirect('resume_list')
+
+            except Exception as e:
+                messages.error(
+                    request, f"An unexpected error occurred: {str(e)}")
         else:
-            messages.error(request, "There was a problem with your upload.")
+            messages.error(
+                request, "There was a problem with your upload. Please check the form and try again.")
     else:
         form = ResumeForm()
     return render(request, 'resumes/upload_resume.html', {'form': form})
@@ -122,6 +154,34 @@ def delete_resume(request, pk):
 @login_required
 def profile(request):
     return render(request, 'resumes/profile.html')
+
+
+@login_required
+def regenerate_ai_feedback(request, pk):
+    """Regenerate AI feedback for an existing resume."""
+    resume = get_object_or_404(Resume, pk=pk, user=request.user)
+
+    if not resume.text_content:
+        messages.error(
+            request, "Cannot regenerate AI feedback: No text content available for this resume.")
+        return redirect('resume_detail', pk=pk)
+
+    try:
+        ai_feedback = analyze_resume_with_gemini(resume.text_content)
+        resume.ai_feedback = ai_feedback
+
+        if 'error' in ai_feedback:
+            messages.warning(
+                request, f"AI analysis failed: {ai_feedback.get('error')}")
+        else:
+            messages.success(request, "AI feedback regenerated successfully!")
+
+        resume.save()
+
+    except Exception as e:
+        messages.error(request, f"Failed to regenerate AI feedback: {str(e)}")
+
+    return redirect('resume_detail', pk=pk)
 
 
 class ResumeAnalysisAPIView(APIView):

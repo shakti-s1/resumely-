@@ -9,6 +9,8 @@ urlpatterns = [
     path('<int:pk>/', views.resume_detail, name='resume_detail'),
     path('<int:pk>/edit/', views.edit_resume, name='edit_resume'),
     path('<int:pk>/delete/', views.delete_resume, name='delete_resume'),
+    path('<int:pk>/regenerate-ai/', views.regenerate_ai_feedback,
+         name='regenerate_ai_feedback'),
     path('profile/', views.profile, name='profile'),
     # API endpoint for resume analysis
     path('api/analyze-resume/', views.ResumeAnalysisAPIView.as_view(),
