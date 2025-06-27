@@ -4,78 +4,191 @@
 {% block title %}Upload Resume - Resumely{% endblock %}
 
 {% block content %}
-<div class="container mt-5 slide-up">
+<div class="container-fluid py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card upload-card">
-                <div class="card-header text-center">
-                    <div class="upload-icon mb-3">
-                        <i class="bi bi-cloud-upload"></i>
-                    </div>
-                    <h2 class="mb-0">Upload Resume</h2>
-                    <p class="text-white-50 mb-0">Add your resume for AI-powered analysis</p>
+        <div class="col-lg-8 col-xl-6">
+            <!-- Header Section -->
+            <div class="upload-header glass mb-5 p-5 text-center">
+                <div class="upload-icon mb-4 mx-auto">
+                    <i class="bi bi-cloud-upload"></i>
                 </div>
-                <div class="card-body p-4">
-                    <form method="post" enctype="multipart/form-data" class="upload-form">
-                        {% csrf_token %}
-                        <!-- Resume Name Field -->
-                        <div class="form-group mb-4">
-                            <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">
-                                {{ form.title.label }}
-                            </label>
-                            {{ form.title|addclass:"form-control" }}
-                            {% if form.title.errors %}
-                            <div class="text-danger mt-2">
-                                <small>
-                                    {% for error in form.title.errors %}
-                                    {{ error }}
-                                    {% endfor %}
-                                </small>
+                <h1 class="display-5 fw-bold text-gradient mb-3">Upload Your Resume</h1>
+                <p class="lead text-muted mb-0">
+                    Get AI-powered analysis and professional insights for your resume
+                </p>
+            </div>
+
+            <!-- Upload Form -->
+            <div class="upload-form">
+                <div class="card glass border-0 shadow-lg">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="form-icon me-3">
+                                <i class="bi bi-file-earmark-text"></i>
                             </div>
-                            {% endif %}
-                            {% if form.title.help_text %}
-                            <div class="form-text mt-2">
-                                {{ form.title.help_text }}
+                            <div>
+                                <h4 class="mb-1">Resume Information</h4>
+                                <p class="mb-0 opacity-75">Provide details about your resume</p>
                             </div>
-                            {% endif %}
                         </div>
-                        <!-- Resume File Field -->
-                        <div class="form-group mb-4">
-                            <label for="{{ form.document.id_for_label }}" class="form-label fw-semibold">
-                                {{ form.document.label }}
-                            </label>
-                            <div class="file-upload-area">
-                                {{ form.document|addclass:"form-control file-input" }}
-                                <div class="file-upload-overlay">
-                                    <i class="bi bi-cloud-upload fs-1 text-muted"></i>
-                                    <p class="text-muted mt-2">Click to browse or drag and drop</p>
-                                    <small class="text-muted">Supports PDF, DOCX (Max 5MB)</small>
+                    </div>
+
+                    <div class="card-body p-4">
+                        {% if form.errors|safe_boolean %}
+                        <div class="alert alert-danger">
+                            Please correct the errors below.
+                        </div>
+                        {% endif %}
+                        <form method="post" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
+
+                            <!-- File Upload Section -->
+                            <div class="file-upload-section mb-4">
+                                <label for="{{ form.document.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-file-earmark-pdf me-2"></i>Resume File
+                                </label>
+
+                                <div class="file-drop-zone" id="fileDropZone">
+                                    <div class="drop-zone-content">
+                                        <div class="drop-zone-icon mb-3">
+                                            <i class="bi bi-cloud-arrow-up"></i>
+                                        </div>
+                                        <h5 class="mb-2">Drag & Drop your resume here</h5>
+                                        <p class="text-muted mb-3">or click to browse files</p>
+                                        <div class="supported-formats">
+                                            <span class="badge bg-light text-dark me-2">PDF</span>
+                                            <span class="badge bg-light text-dark me-2">DOC</span>
+                                            <span class="badge bg-light text-dark me-2">DOCX</span>
+                                            <span class="badge bg-light text-dark">TXT</span>
+                                        </div>
+                                    </div>
+                                    {{ form.document }}
+                                </div>
+
+                                <div class="file-preview mt-3" id="filePreview" style="display: none;">
+                                    <div class="selected-file">
+                                        <div class="file-info">
+                                            <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                            <span id="fileName" class="fw-medium"></span>
+                                            <small id="fileSize" class="text-muted ms-2"></small>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" id="removeFile">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {% for error in form.document.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                                {% empty %}
+                                <!-- No errors -->
+                                {% endfor %}
+                            </div>
+
+                            <!-- Title Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-tag me-2"></i>Resume Title
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-file-text"></i>
+                                    </span>
+                                    {{ form.title }}
+                                </div>
+                                {% for error in form.title.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                                {% empty %}
+                                <!-- No errors -->
+                                {% endfor %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Give your resume a descriptive name (e.g., "Software Engineer Resume - 2024")
                                 </div>
                             </div>
-                            {% if form.document.errors %}
-                            <div class="text-danger mt-2">
-                                <small>
-                                    {% for error in form.document.errors %}
-                                    {{ error }}
-                                    {% endfor %}
-                                </small>
+
+                            <!-- Description Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-card-text me-2"></i>Description (Optional)
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-pencil"></i>
+                                    </span>
+                                    {{ form.description }}
+                                </div>
+                                {% for error in form.description.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                                {% empty %}
+                                <!-- No errors -->
+                                {% endfor %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Add notes about this resume version or target position
+                                </div>
                             </div>
-                            {% endif %}
-                            {% if form.document.help_text %}
-                            <div class="form-text mt-2">
-                                {{ form.document.help_text }}
+
+                            <!-- AI Analysis Toggle -->
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="enableAI" checked>
+                                    <label class="form-check-label fw-bold" for="enableAI">
+                                        <i class="bi bi-robot me-2"></i>Enable AI Analysis
+                                    </label>
+                                </div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Get professional insights, optimization suggestions, and ATS compatibility checks
+                                </div>
                             </div>
-                            {% endif %}
+
+                            <!-- Submit Buttons -->
+                            <div class="submit-section">
+                                <div class="d-grid gap-3">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                        <i class="bi bi-cloud-upload me-2"></i>Upload Resume
+                                    </button>
+                                    <a href="{% url 'resume_list' %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i>Back to Resumes
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="features-section mt-5">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card glass text-center">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">AI Analysis</h5>
+                            <p class="text-muted mb-0">Get professional insights and optimization suggestions</p>
                         </div>
-                        <div class="d-grid gap-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-cloud-upload me-2"></i>Upload & Analyze
-                            </button>
-                            <a href="{% url 'resume_list' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-2"></i>Back to List
-                            </a>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card glass text-center">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">ATS Compatible</h5>
+                            <p class="text-muted mb-0">Ensure your resume passes through applicant tracking systems</p>
                         </div>
-                    </form>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card glass text-center">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">Career Insights</h5>
+                            <p class="text-muted mb-0">Receive personalized career coaching and recommendations</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,114 +196,326 @@
 </div>
 
 <style>
-    .upload-card {
-        border: none;
-        box-shadow: var(--shadow-lg);
-        border-radius: 20px;
-        overflow: hidden;
+    /* File Upload Styles */
+    .file-drop-zone {
+        border: 3px dashed #cbd5e1;
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+        position: relative;
     }
 
-    .upload-icon {
+    .file-drop-zone:hover {
+        border-color: var(--primary-color);
+        background: rgba(79, 70, 229, 0.05);
+    }
+
+    .file-drop-zone.dragover {
+        border-color: var(--primary-color);
+        background: rgba(79, 70, 229, 0.1);
+        transform: scale(1.02);
+    }
+
+    /* Hide the actual file input */
+    .file-drop-zone input[type="file"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+    }
+
+    .drop-zone-icon {
         width: 80px;
         height: 80px;
-        background: rgba(255, 255, 255, 0.2);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto;
-        font-size: 2.5rem;
+        font-size: 2rem;
         color: white;
     }
 
-    .file-upload-area {
-        position: relative;
-        border: 2px dashed var(--border-color);
-        border-radius: 12px;
-        padding: 2rem;
-        text-align: center;
-        transition: all 0.3s ease;
+    .supported-formats .badge {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+    }
+
+    /* File Preview */
+    .selected-file {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
         background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
     }
 
-    .file-upload-area:hover {
-        border-color: var(--primary-color);
-        background: rgba(99, 102, 241, 0.05);
+    .file-info {
+        display: flex;
+        align-items: center;
     }
 
-    .file-input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-        z-index: 2;
+    /* Upload Header */
+    .upload-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
     }
 
-    .file-upload-overlay {
-        pointer-events: none;
-        z-index: 1;
+    .upload-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 3rem;
+        color: white;
     }
 
-    .file-input:focus+.file-upload-overlay {
-        color: var(--primary-color);
+    .text-gradient {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .form-label {
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
+    /* Upload Form */
+    .upload-form .card {
+        border-radius: 20px;
+        overflow: hidden;
     }
 
-    .form-text {
+    .form-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Form Fields */
+    .input-group-text {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-right: none;
         color: var(--text-secondary);
-        font-size: 0.875rem;
+    }
+
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+    }
+
+    .form-control:focus+.input-group-text {
+        border-color: var(--primary-color);
+    }
+
+    /* Form Switch */
+    .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        border-radius: 1rem;
+        border: 2px solid #e2e8f0;
+        background-color: #f8fafc;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+    }
+
+    /* Submit Section */
+    .submit-section {
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    /* Features Section */
+    .feature-card {
+        padding: 2rem 1rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .upload-header {
+            padding: 2rem 1rem;
+        }
+
+        .upload-icon {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+        }
+
+        .file-drop-zone {
+            padding: 2rem 1rem;
+        }
+
+        .drop-zone-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+
+        .feature-card {
+            padding: 1.5rem 1rem;
+        }
+    }
+
+    /* Animation */
+    .upload-form {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
 <script>
+    // Drag and drop file upload logic
     document.addEventListener('DOMContentLoaded', function () {
-        const fileInput = document.querySelector('.file-input');
-        const uploadArea = document.querySelector('.file-upload-area');
-        const overlay = document.querySelector('.file-upload-overlay');
+        const dropZone = document.getElementById('fileDropZone');
+        const fileInput = dropZone.querySelector('input[type="file"]');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
 
-        if (fileInput && uploadArea && overlay) {
-            fileInput.addEventListener('change', function () {
-                if (this.files.length > 0) {
-                    const fileName = this.files[0].name;
-                    overlay.innerHTML = `
-                    <i class="bi bi-check-circle fs-1 text-success"></i>
-                    <p class="text-success mt-2 fw-semibold">${fileName}</p>
-                    <small class="text-muted">File selected successfully</small>
-                `;
-                    uploadArea.style.borderColor = 'var(--success-color)';
-                    uploadArea.style.background = 'rgba(16, 185, 129, 0.05)';
-                }
-            });
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
 
-            // Drag and drop functionality
-            uploadArea.addEventListener('dragover', function (e) {
-                e.preventDefault();
-                this.style.borderColor = 'var(--primary-color)';
-                this.style.background = 'rgba(99, 102, 241, 0.1)';
-            });
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
-            uploadArea.addEventListener('dragleave', function (e) {
-                e.preventDefault();
-                this.style.borderColor = 'var(--border-color)';
-                this.style.background = '#f8fafc';
-            });
+        // Highlight drop zone when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
 
-            uploadArea.addEventListener('drop', function (e) {
-                e.preventDefault();
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    fileInput.files = files;
-                    fileInput.dispatchEvent(new Event('change'));
-                }
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('dragover');
+        }
+
+        // Handle dropped files
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            updateFilePreview();
+        }
+
+        // Handle file input change
+        fileInput.addEventListener('change', updateFilePreview);
+
+        function updateFilePreview() {
+            const file = fileInput.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                filePreview.style.display = 'block';
+            } else {
+                filePreview.style.display = 'none';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Remove file
+        if (removeFile) {
+            removeFile.addEventListener('click', function () {
+                fileInput.value = '';
+                filePreview.style.display = 'none';
             });
         }
+
+        // Auto-focus on title field when file is selected
+        fileInput.addEventListener('change', function () {
+            if (this.files.length > 0) {
+                document.getElementById('id_title').focus();
+            }
+        });
     });
 </script>
 {% endblock %}

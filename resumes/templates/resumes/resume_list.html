@@ -1,95 +1,234 @@
 {% extends "resumes/base.html" %}
+{% load custom_filters %}
 
 {% block title %}My Resumes - Resumely{% endblock %}
 
 {% block content %}
-<div class="container mt-5 slide-up">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <div>
-                    <h1 class="display-5 fw-bold text-gradient">
-                        <i class="bi bi-collection me-3"></i>My Resumes
-                    </h1>
-                    <p class="text-muted fs-5">Manage and analyze your professional resumes</p>
-                </div>
-                <a href="{% url 'upload_resume' %}" class="btn btn-primary btn-lg">
-                    <i class="bi bi-plus-circle me-2"></i>Upload New Resume
+<div class="container-fluid py-5">
+    <!-- Header Section -->
+    <div class="page-header glass mb-5 p-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold text-gradient mb-3">My Resumes</h1>
+                <p class="lead text-muted mb-0">
+                    Manage and analyze your professional resumes with AI-powered insights
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <a href="{% url 'upload_resume' %}" class="btn btn-primary btn-lg shadow">
+                    <i class="bi bi-cloud-upload me-2"></i>Upload New Resume
                 </a>
             </div>
+        </div>
+    </div>
 
-            {% if resumes %}
-            <div class="row g-4">
-                {% for resume in resumes %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 resume-card">
-                        <div class="card-body d-flex flex-column">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="resume-icon me-3">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                </div>
-                                <div>
-                                    <h5 class="card-title mb-1">{{ resume.title }}</h5>
-                                    <small class="text-muted">
-                                        <i class="bi bi-calendar3 me-1"></i>
-                                        {{ resume.created_at|date:"M d, Y" }}
-                                    </small>
-                                </div>
+    <!-- Stats Cards -->
+    <div class="stats-section mb-5">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-card glass text-center py-4">
+                    <div class="stat-icon mb-2">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <h3 class="stat-number mb-1">{{ resumes.count }}</h3>
+                    <p class="stat-label mb-0">Total Resumes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card glass text-center py-4">
+                    <div class="stat-icon mb-2">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <h3 class="stat-number mb-1">{{ resumes_with_ai.count }}</h3>
+                    <p class="stat-label mb-0">AI Analyzed</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card glass text-center py-4">
+                    <div class="stat-icon mb-2">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <h3 class="stat-number mb-1">{{ recent_resumes.count }}</h3>
+                    <p class="stat-label mb-0">This Month</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card glass text-center py-4">
+                    <div class="stat-icon mb-2">
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <h3 class="stat-number mb-1">{{ user.date_joined|date:"Y" }}</h3>
+                    <p class="stat-label mb-0">Member Since</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumes Grid -->
+    {% if resumes %}
+    <div class="resumes-grid">
+        <div class="row g-4">
+            {% for resume in resumes %}
+            <div class="col-lg-6 col-xl-4">
+                <div class="resume-card glass h-100 d-flex flex-column">
+                    <div
+                        class="card-header d-flex align-items-center justify-content-between bg-transparent border-0 pb-0">
+                        <div class="d-flex align-items-center">
+                            <div class="resume-icon me-3">
+                                <i class="bi bi-file-earmark-pdf"></i>
                             </div>
-
-                            {% if resume.ai_feedback %}
-                            <div class="mb-3">
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle me-1"></i>AI Analyzed
-                                </span>
+                            <div>
+                                <h5 class="mb-1 fw-bold">{{ resume.title }}</h5>
+                                <small class="opacity-75">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ resume.created_at|date:"M d, Y" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'resume_detail' resume.pk %}">
+                                        <i class="bi bi-eye me-2"></i>View Details
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'edit_resume' resume.pk %}">
+                                        <i class="bi bi-pencil me-2"></i>Edit
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ resume.document.url }}" target="_blank">
+                                        <i class="bi bi-download me-2"></i>Download
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{% url 'delete_resume' resume.pk %}">
+                                        <i class="bi bi-trash me-2"></i>Delete
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="resume-info mb-3">
+                            <div class="info-item">
+                                <i class="bi bi-clock me-2 text-muted"></i>
+                                <span class="text-muted">Uploaded {{ resume.created_at|timesince }} ago</span>
+                            </div>
+                            <div class="info-item">
+                                <i class="bi bi-file-earmark me-2 text-muted"></i>
+                                <span class="text-muted">{{ resume.document.name|slice:"-4:"|upper }} Document</span>
+                            </div>
+                            {% if resume.text_content %}
+                            <div class="info-item">
+                                <i class="bi bi-check-circle me-2 text-success"></i>
+                                <span class="text-success">Text extracted</span>
                             </div>
                             {% else %}
-                            <div class="mb-3">
-                                <span class="badge bg-secondary">
-                                    <i class="bi bi-clock me-1"></i>Pending Analysis
-                                </span>
+                            <div class="info-item">
+                                <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+                                <span class="text-warning">No text content</span>
                             </div>
                             {% endif %}
-
-                            <div class="mt-auto">
-                                <div class="btn-group w-100" role="group">
-                                    <a href="{% url 'resume_detail' resume.pk %}" class="btn btn-outline-primary">
-                                        <i class="bi bi-eye me-1"></i>View
-                                    </a>
+                        </div>
+                        <!-- AI Analysis Status -->
+                        <div class="ai-status mb-3">
+                            {% if resume.ai_feedback|safe_boolean %}
+                            {% if resume.ai_feedback.error|safe_boolean %}
+                            <div class="ai-error">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                <span class="text-warning">Analysis Error</span>
+                            </div>
+                            {% else %}
+                            <div class="ai-success">
+                                <i class="bi bi-robot text-info me-2"></i>
+                                <span class="text-info">AI Analysis Complete</span>
+                            </div>
+                            <div class="ai-sections mt-2">
+                                {% for section in sections %}
+                                {% with feedback=resume.ai_feedback|get_item:section %}
+                                {% if feedback %}
+                                <span class="badge bg-success me-1">{{ section|title|slice:":3" }}</span>
+                                {% endif %}
+                                {% endwith %}
+                                {% empty %}
+                                <p class="text-muted mb-0">No sections found.</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <div class="ai-pending">
+                                <i class="bi bi-clock text-muted me-2"></i>
+                                <span class="text-muted">No AI analysis</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Action Buttons -->
+                        <div class="card-actions mt-auto">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'resume_detail' resume.pk %}" class="btn btn-primary">
+                                    <i class="bi bi-eye me-2"></i>View Analysis
+                                </a>
+                                <div class="btn-group" role="group">
                                     <a href="{% url 'edit_resume' resume.pk %}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-pencil me-1"></i>Edit
+                                        <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="{{ resume.document.url }}" class="btn btn-outline-success" target="_blank">
-                                        <i class="bi bi-download me-1"></i>Download
+                                    <a href="{{ resume.document.url }}" class="btn btn-outline-secondary"
+                                        target="_blank">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    <a href="{% url 'delete_resume' resume.pk %}" class="btn btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                {% endfor %}
             </div>
-            {% else %}
-            <div class="text-center py-5">
-                <div class="empty-state">
-                    <div class="empty-icon mb-4">
-                        <i class="bi bi-file-earmark-text"></i>
-                    </div>
-                    <h3 class="fw-bold mb-3">No resumes uploaded yet</h3>
-                    <p class="text-muted fs-5 mb-4">
-                        Start by uploading your first resume to get AI-powered feedback and career insights.
-                    </p>
-                    <a href="{% url 'upload_resume' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-plus-circle me-2"></i>Upload Your First Resume
-                    </a>
-                </div>
-            </div>
-            {% endif %}
+            {% empty %}
+            <p class="text-muted mb-0">No resumes found.</p>
+            {% endfor %}
         </div>
     </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="card glass border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="empty-icon mb-4">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <h3 class="fw-bold mb-3">No Resumes Yet</h3>
+                <p class="text-muted mb-4">
+                    Start building your professional portfolio by uploading your first resume.
+                    Get AI-powered insights and optimization suggestions.
+                </p>
+                <a href="{% url 'upload_resume' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-cloud-upload me-2"></i>Upload Your First Resume
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <style>
+    .page-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e8f0 100%);
+        padding: 3rem 2rem;
+        border-radius: 32px;
+        border: 1px solid #e2e8f0;
+        box-shadow: var(--shadow-md);
+    }
+
     .text-gradient {
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         -webkit-background-clip: text;
@@ -97,59 +236,140 @@
         background-clip: text;
     }
 
-    .resume-card {
+    .stat-card {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
         transition: all 0.3s ease;
-        border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-number {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--primary-dark);
+        margin: 0;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .resumes-grid {
+        margin-top: 2rem;
+    }
+
+    .resume-card {
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
     }
 
     .resume-card:hover {
-        border-color: var(--primary-color);
-        transform: translateY(-8px);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
     }
 
     .resume-icon {
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
         background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: #fff;
         font-size: 1.5rem;
     }
 
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .ai-status {
+        margin-top: 1rem;
+    }
+
+    .ai-success,
+    .ai-error,
+    .ai-pending {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .ai-sections {
+        margin-top: 0.5rem;
+    }
+
+    .badge {
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        padding: 0.5em 1em;
+    }
+
+    .card-actions .btn {
+        margin-bottom: 0.5rem;
+    }
+
     .empty-state {
-        max-width: 500px;
-        margin: 0 auto;
+        margin-top: 4rem;
     }
 
     .empty-icon {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
         font-size: 3rem;
-        color: var(--text-secondary);
+        color: #cbd5e1;
     }
 
-    .btn-group .btn {
-        border-radius: 8px;
-        margin: 0 2px;
-    }
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 2rem 1rem;
+        }
 
-    .btn-group .btn:first-child {
-        border-radius: 8px 0 0 8px;
-        margin-left: 0;
-    }
+        .stat-card {
+            padding: 1.5rem 0.5rem;
+        }
 
-    .btn-group .btn:last-child {
-        border-radius: 0 8px 8px 0;
-        margin-right: 0;
+        .resume-card {
+            padding: 1rem;
+        }
     }
 </style>
 {% endblock %}

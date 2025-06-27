@@ -1,50 +1,139 @@
-{% extends 'resumes/base.html' %}
-{% load custom_filters %}
+{% extends "resumes/base.html" %}
 
 {% block title %}Login - Resumely{% endblock %}
 
 {% block content %}
-<div class="container mt-5 slide-up">
+<div class="container-fluid py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card login-card">
-                <div class="card-header text-center">
-                    <div class="login-icon mb-3">
-                        <i class="bi bi-person-circle"></i>
-                    </div>
-                    <h2 class="mb-0">Welcome Back</h2>
-                    <p class="text-white-50 mb-0">Sign in to your Resumely account</p>
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <!-- Header Section -->
+            <div class="auth-header glass mb-5 p-5 text-center">
+                <div class="auth-icon mb-4 mx-auto">
+                    <i class="bi bi-box-arrow-in-right"></i>
                 </div>
-                <div class="card-body p-4">
-                    <form method="post" class="login-form">
-                        {% csrf_token %}
-                        {% for field in form %}
-                        <div class="form-floating mb-3">
-                            {{ field|addclass:"form-control" }}
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {% if field.errors %}
-                            <div class="text-danger mt-1">
-                                <small>
-                                    <i class="bi bi-exclamation-circle me-1"></i>
-                                    {% for error in field.errors %}
-                                    {{ error }}
-                                    {% endfor %}
-                                </small>
+                <h1 class="display-5 fw-bold text-gradient mb-3">Welcome Back</h1>
+                <p class="lead text-muted mb-0">
+                    Sign in to your account and continue your career journey
+                </p>
+            </div>
+
+            <!-- Login Form -->
+            <div class="auth-form">
+                <div class="card glass border-0 shadow-lg">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="form-icon me-3">
+                                <i class="bi bi-box-arrow-in-right"></i>
                             </div>
-                            {% endif %}
+                            <div>
+                                <h4 class="mb-1">Sign In</h4>
+                                <p class="mb-0 opacity-75">Enter your credentials to access your account</p>
+                            </div>
                         </div>
-                        {% endfor %}
-                        <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-                            </button>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <form method="post" id="loginForm">
+                            {% csrf_token %}
+
+                            <!-- Username Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-person me-2"></i>Username
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-at"></i>
+                                    </span>
+                                    {{ form.username }}
+                                </div>
+                                {% for error in form.username.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                                {% empty %}
+                                <!-- No errors -->
+                                {% endfor %}
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.password.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-lock me-2"></i>Password
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </span>
+                                    {{ form.password }}
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                {% for error in form.password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                                {% empty %}
+                                <!-- No errors -->
+                                {% endfor %}
+                            </div>
+
+                            <!-- Remember Me -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                                    <label class="form-check-label" for="rememberMe">
+                                        Remember me for 30 days
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                                </button>
+                            </div>
+
+                            <!-- Register Link -->
+                            <div class="text-center">
+                                <p class="mb-0">
+                                    Don't have an account?
+                                    <a href="{% url 'register' %}" class="text-decoration-none fw-bold">Create one</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="features-section mt-5">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card glass text-center">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <h6 class="fw-bold mb-2">AI Analysis</h6>
+                            <p class="text-muted small mb-0">Get professional insights and optimization suggestions</p>
                         </div>
-                    </form>
-                    <div class="text-center">
-                        <p class="text-muted mb-0">Don't have an account?</p>
-                        <a href="{% url 'register' %}" class="btn btn-link text-decoration-none">
-                            <i class="bi bi-person-plus me-1"></i>Create Account
-                        </a>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card glass text-center">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <h6 class="fw-bold mb-2">Secure Access</h6>
+                            <p class="text-muted small mb-0">Your account is protected with industry-standard security
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card glass text-center">
+                            <div class="feature-icon mb-3">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <h6 class="fw-bold mb-2">Career Growth</h6>
+                            <p class="text-muted small mb-0">Track your progress and improve your career prospects</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -53,49 +142,199 @@
 </div>
 
 <style>
-    .login-card {
-        border: none;
-        box-shadow: var(--shadow-lg);
+    /* Auth Header */
+    .auth-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 3rem 2rem;
         border-radius: 20px;
-        overflow: hidden;
+        border: 1px solid #e2e8f0;
     }
 
-    .login-icon {
-        width: 80px;
-        height: 80px;
-        background: rgba(255, 255, 255, 0.2);
+    .auth-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto;
-        font-size: 2.5rem;
+        font-size: 3rem;
         color: white;
     }
 
-    .form-floating>.form-control {
-        padding: 1rem 0.75rem;
-        height: calc(3.5rem + 2px);
-        line-height: 1.25;
+    .text-gradient {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .form-floating>label {
-        padding: 1rem 0.75rem;
+    /* Auth Form */
+    .auth-form .card {
+        border-radius: 20px;
+        overflow: hidden;
     }
 
-    .form-floating>.form-control:focus~label,
-    .form-floating>.form-control:not(:placeholder-shown)~label {
-        opacity: 0.65;
-        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    .form-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
     }
 
-    .btn-link {
-        color: var(--primary-color);
+    /* Form Fields */
+    .input-group-text {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-right: none;
+        color: var(--text-secondary);
+    }
+
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-left: none;
+        border-radius: 0 12px 12px 0;
+        padding: 0.75rem 1rem;
         font-weight: 500;
     }
 
-    .btn-link:hover {
-        color: var(--primary-dark);
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+    }
+
+    .form-control:focus+.input-group-text {
+        border-color: var(--primary-color);
+    }
+
+    /* Password Toggle Button */
+    .btn-outline-secondary {
+        border: 2px solid #e2e8f0;
+        border-left: none;
+        color: var(--text-secondary);
+    }
+
+    .btn-outline-secondary:hover {
+        background: #e2e8f0;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    /* Form Check */
+    .form-check-input {
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+    }
+
+    /* Features Section */
+    .feature-card {
+        padding: 1.5rem 1rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 1.2rem;
+        color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .auth-header {
+            padding: 2rem 1rem;
+        }
+
+        .auth-icon {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+        }
+
+        .feature-card {
+            padding: 1rem;
+        }
+    }
+
+    /* Animation */
+    .auth-form {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('id_password');
+        const submitBtn = document.getElementById('submitBtn');
+        const loginForm = document.getElementById('loginForm');
+
+        // Password toggle functionality
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+
+            const icon = this.querySelector('i');
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+
+        // Form submission
+        loginForm.addEventListener('submit', function () {
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="loading"></span> Signing In...';
+            submitBtn.disabled = true;
+
+            // Re-enable after 30 seconds as fallback
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 30000);
+        });
+
+        // Auto-focus on username field
+        document.getElementById('id_username').focus();
+    });
+</script>
 {% endblock %}

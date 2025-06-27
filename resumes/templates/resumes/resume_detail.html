@@ -4,162 +4,277 @@
 {% block title %}Resume Details - Resumely{% endblock %}
 
 {% block content %}
-<div class="container mt-5 slide-up">
+{% csrf_token %}
+<div class="container-fluid py-5">
     <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8">
-            <div class="card">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <h2 class="mb-0">{{ resume.title }}</h2>
+        <div class="col-lg-10 col-xl-8">
+            <!-- Header Section -->
+            <div class="resume-header glass mb-5 p-5">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <a href="{{ resume.document.url }}" class="btn btn-outline-success btn-sm" target="_blank">
-                            <i class="bi bi-download me-1"></i>Download
+                        <h1 class="display-5 fw-bold text-gradient mb-2">{{ resume.title }}</h1>
+                        <p class="text-muted fs-5 mb-0">
+                            <i class="bi bi-calendar3 me-2"></i>
+                            Uploaded {{ resume.created_at|date:"F j, Y" }}
+                        </p>
+                    </div>
+                    <div class="header-actions">
+                        <a href="{% url 'edit_resume' resume.pk %}" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-pencil me-2"></i>Edit
+                        </a>
+                        <a href="{% url 'delete_resume' resume.pk %}" class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-2"></i>Delete
                         </a>
                     </div>
                 </div>
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <span class="text-muted">Uploaded:</span> {{ resume.created_at|date:"M d, Y H:i" }}
-                    </div>
-                    <div class="d-flex flex-wrap gap-2 mb-4">
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
                         <a href="{% url 'resume_list' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                            <i class="bi bi-arrow-left me-2"></i>Back to Resumes
                         </a>
-                        <a href="{% url 'edit_resume' resume.pk %}" class="btn btn-outline-primary">
-                            <i class="bi bi-pencil me-1"></i>Edit Resume
-                        </a>
-                        <a href="{% url 'delete_resume' resume.pk %}" class="btn btn-outline-danger">
-                            <i class="bi bi-trash me-1"></i>Delete Resume
-                        </a>
-                        {% if resume.text_content %}
-                        <a href="{% url 'regenerate_ai_feedback' resume.pk %}" class="btn btn-outline-info">
-                            <i class="bi bi-arrow-clockwise me-1"></i>Regenerate AI Feedback
-                        </a>
-                        {% endif %}
                     </div>
-                    <hr>
-
-                    <!-- AI Feedback Section -->
-                    <div class="mt-5">
-                        <h3 class="mb-3">AI Resume Feedback <span title="What is this?" style="cursor:help;">🤖</span>
-                        </h3>
-                        <p class="text-muted">Our AI analyzes your resume and provides section-wise suggestions,
-                            rewrites, and ATS checks. Use the feedback to improve your resume instantly!</p>
-
+                    <div>
                         {% if resume.ai_feedback %}
-                        {% if resume.ai_feedback.error %}
-                        <div class="alert alert-warning">
-                            AI feedback could not be generated: {{ resume.ai_feedback.error }}
-                        </div>
-                        {% if resume.ai_feedback.raw_response %}
-                        <pre class="bg-light p-2">{{ resume.ai_feedback.raw_response }}</pre>
+                        <a href="{% url 'improve_resume' resume.pk %}" class="btn btn-primary me-2">
+                            <i class="bi bi-magic me-2"></i>Improve My Resume
+                        </a>
                         {% endif %}
-                        {% else %}
-                        <div class="accordion" id="aiFeedbackAccordion">
-                            {% for section in sections %}
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="heading-{{ section }}">
-                                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}"
-                                        type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ section }}"
-                                        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
-                                        aria-controls="collapse-{{ section }}">
-                                        {{ section|title|replace_underscores }}
-                                    </button>
-                                </h2>
-                                <div id="collapse-{{ section }}"
-                                    class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
-                                    aria-labelledby="heading-{{ section }}" data-bs-parent="#aiFeedbackAccordion">
-                                    <div class="accordion-body">
-                                        {% with feedback=resume.ai_feedback|get_item:section %}
-                                        {% if feedback %}
-                                        <!-- Suggestions -->
-                                        <div class="mb-3">
-                                            <span class="fw-bold">💡 Suggestions:</span>
-                                            {% if feedback.suggestions %}
-                                            {% if feedback.suggestions|length > 0 %}
-                                            <ul>
-                                                {% for suggestion in feedback.suggestions %}
-                                                <li>{{ suggestion }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                            {% else %}
-                                            <span class="text-muted">No suggestions.</span>
-                                            {% endif %}
-                                            {% else %}
-                                            <span class="text-muted">No suggestions.</span>
-                                            {% endif %}
-                                        </div>
+                        <button class="btn btn-outline-primary me-2" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i>Print
+                        </button>
+                        <a href="{{ resume.document.url }}" class="btn btn-success" download>
+                            <i class="bi bi-download me-2"></i>Download
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-                                        <!-- Rewrites -->
-                                        <div class="mb-3">
-                                            <span class="fw-bold">✍️ Rewrites:</span>
-                                            {% if feedback.rewrites %}
-                                            {% if feedback.rewrites|length > 0 %}
-                                            <ul class="list-group">
-                                                {% for rewrite in feedback.rewrites %}
-                                                <li
-                                                    class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <span class="text-muted">Original:</span> {{
-                                                        rewrite.original|default:'—' }}<br>
-                                                        <span class="text-success">Improved:</span> <span
-                                                            class="improved-bullet">{{ rewrite.improved|default:rewrite
-                                                            }}</span>
-                                                    </div>
-                                                    <button class="btn btn-outline-secondary btn-sm ms-2 copy-btn"
-                                                        data-bullet="{{ rewrite.improved|default:rewrite }}"
-                                                        title="Copy improved bullet">Copy</button>
-                                                </li>
-                                                {% endfor %}
-                                            </ul>
-                                            {% else %}
-                                            <span class="text-muted">No rewrites.</span>
-                                            {% endif %}
-                                            {% else %}
-                                            <span class="text-muted">No rewrites.</span>
-                                            {% endif %}
-                                        </div>
-
-                                        <!-- ATS Check -->
-                                        <div class="mb-3">
-                                            <span class="fw-bold">🛡️ ATS Check:</span>
-                                            {% if feedback.ats_check %}
-                                            {% if feedback.ats_check|length > 0 %}
-                                            <ul>
-                                                {% for ats in feedback.ats_check %}
-                                                <li>
-                                                    {% if 'missing' in ats|lower or 'issue' in ats|lower or 'error' in
-                                                    ats|lower %}
-                                                    <span class="badge bg-warning text-dark">⚠️</span>
-                                                    {% else %}
-                                                    <span class="badge bg-success">✔️</span>
-                                                    {% endif %}
-                                                    {{ ats }}
-                                                </li>
-                                                {% endfor %}
-                                            </ul>
-                                            {% else %}
-                                            <span class="text-muted">No ATS issues found.</span>
-                                            {% endif %}
-                                            {% else %}
-                                            <span class="text-muted">No ATS issues found.</span>
-                                            {% endif %}
-                                        </div>
-                                        {% else %}
-                                        <span class="text-muted">No feedback for this section.</span>
-                                        {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
+            <!-- Resume Content -->
+            <div class="resume-content mb-5">
+                <div class="card glass border-0 shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="bi bi-file-text me-2"></i>
+                            Resume Content
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if resume.text_content %}
+                        <div class="resume-text">
+                            <pre class="mb-0">{{ resume.text_content }}</pre>
                         </div>
-                        {% endif %}
                         {% else %}
-                        <div class="alert alert-info">No AI feedback available for this resume yet.</div>
+                        <div class="text-center py-4">
+                            <i class="bi bi-file-earmark-text text-muted fs-1 mb-3"></i>
+                            <p class="text-muted mb-0">No text content available.</p>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
+
+            <!-- AI Feedback Section -->
+            {% if resume.ai_feedback %}
+            <div class="ai-feedback-section mt-5" id="ai-analysis">
+                <div class="section-header glass mb-4 p-4 d-flex align-items-center">
+                    <div class="ai-icon me-3">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-1">AI Analysis & Feedback</h3>
+                        <p class="mb-0 opacity-75">Professional insights and optimization suggestions</p>
+                    </div>
+                </div>
+                <div class="feedback-accordion">
+                    {% for section in sections %}
+                    <div class="feedback-card mb-4">
+                        <div class="card glass border-0 shadow-sm">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="section-icon me-3">
+                                        {% if section == 'summary' %}
+                                        <i class="bi bi-file-text"></i>
+                                        {% elif section == 'work_experience' %}
+                                        <i class="bi bi-briefcase"></i>
+                                        {% elif section == 'education' %}
+                                        <i class="bi bi-mortarboard"></i>
+                                        {% elif section == 'skills' %}
+                                        <i class="bi bi-gear"></i>
+                                        {% elif section == 'projects' %}
+                                        <i class="bi bi-code-square"></i>
+                                        {% else %}
+                                        <i class="bi bi-list"></i>
+                                        {% endif %}
+                                    </div>
+                                    <h5 class="mb-0">{{ section|title|replace_underscores }}</h5>
+                                </div>
+                                <i class="bi bi-chevron-down"></i>
+                            </div>
+                            <div class="card-body p-4">
+                                {% with feedback=resume.ai_feedback|get_item:section %}
+                                {% if feedback %}
+                                <!-- Original Text -->
+                                {% if feedback.original_text %}
+                                <div class="feedback-section mb-4">
+                                    <div class="section-title">
+                                        <i class="bi bi-file-text text-primary me-2"></i>
+                                        <h6 class="fw-bold mb-3">Original Content</h6>
+                                    </div>
+                                    <div class="original-content p-3 bg-light rounded">
+                                        <p class="mb-0">{{ feedback.original_text }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- AI Feedback -->
+                                {% if feedback.feedback %}
+                                <div class="feedback-section mb-4">
+                                    <div class="section-title">
+                                        <i class="bi bi-lightbulb text-warning me-2"></i>
+                                        <h6 class="fw-bold mb-3">AI Analysis</h6>
+                                    </div>
+                                    <div class="ai-feedback-content p-3 bg-warning bg-opacity-10 rounded">
+                                        <p class="mb-0">{{ feedback.feedback }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Suggestions -->
+                                <div class="feedback-section mb-4">
+                                    <div class="section-title">
+                                        <i class="bi bi-arrow-right-circle text-info me-2"></i>
+                                        <h6 class="fw-bold mb-3">Suggestions for Improvement</h6>
+                                    </div>
+                                    <div class="suggestions-list">
+                                        {% for suggestion in feedback.suggestions %}
+                                        <div class="suggestion-item">
+                                            <i class="bi bi-arrow-right-circle text-primary me-2"></i>
+                                            <span>{{ suggestion }}</span>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted mb-0">No suggestions available for this section.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- Rewrites -->
+                                <div class="feedback-section mb-4">
+                                    <div class="section-title">
+                                        <i class="bi bi-pencil-square text-success me-2"></i>
+                                        <h6 class="fw-bold mb-3">Improved Versions</h6>
+                                    </div>
+                                    <div class="rewrites-list">
+                                        {% for rewrite in feedback.rewrites %}
+                                        <div class="rewrite-item mb-3 p-3 border rounded">
+                                            <div class="rewrite-content">
+                                                {% if rewrite.original %}
+                                                <div class="original-text mb-3">
+                                                    <small class="text-muted fw-semibold">Original:</small>
+                                                    <p class="mb-1">{{ rewrite.original }}</p>
+                                                </div>
+                                                {% endif %}
+                                                <div class="improved-text mb-3">
+                                                    <small class="text-success fw-semibold">Improved:</small>
+                                                    <textarea class="form-control improved-textarea" rows="3"
+                                                        data-original="{{ rewrite.improved }}">{{ rewrite.improved }}</textarea>
+                                                </div>
+                                                {% if rewrite.explanation %}
+                                                <div class="explanation mb-3">
+                                                    <small class="text-info fw-semibold">Why this improvement:</small>
+                                                    <p class="mb-1 small">{{ rewrite.explanation }}</p>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="rewrite-actions d-flex gap-2">
+                                                <button class="btn btn-outline-primary btn-sm copy-btn"
+                                                    data-text="{{ rewrite.improved }}" title="Copy to clipboard">
+                                                    <i class="bi bi-clipboard me-1"></i>Copy
+                                                </button>
+                                                <button class="btn btn-success btn-sm apply-rewrite-btn"
+                                                    title="Apply this rewrite">
+                                                    <i class="bi bi-check-circle me-1"></i>Apply
+                                                </button>
+                                                <button class="btn btn-outline-secondary btn-sm reset-btn"
+                                                    title="Reset to original">
+                                                    <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                                                </button>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted mb-0">No improved versions available for this section.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- ATS Check -->
+                                <div class="feedback-section">
+                                    <div class="section-title">
+                                        <i class="bi bi-shield-check text-info me-2"></i>
+                                        <h6 class="fw-bold mb-3">ATS Compatibility Check</h6>
+                                    </div>
+                                    <div class="ats-list">
+                                        {% for ats in feedback.ats_check %}
+                                        <div class="ats-item">
+                                            {% if ats|has_issues %}
+                                            <span class="badge bg-warning text-dark me-2">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-success me-2">
+                                                <i class="bi bi-check-circle"></i>
+                                            </span>
+                                            {% endif %}
+                                            <span>{{ ats }}</span>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted mb-0">No ATS compatibility issues found for this section.
+                                        </p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <div class="empty-state">
+                                        <i class="bi bi-info-circle text-muted fs-1 mb-3"></i>
+                                        <p class="text-muted mb-0">No feedback available for this section.</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-ai-state mt-5">
+                <div class="card glass border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <div class="empty-icon mb-4">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">No AI Analysis Available</h4>
+                        <p class="text-muted mb-4">Get professional insights and optimization suggestions for your
+                            resume.</p>
+                        {% if resume.text_content %}
+                        <a href="{% url 'regenerate_ai_feedback' resume.pk %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Generate AI Analysis
+                        </a>
+                        {% else %}
+                        <div class="alert alert-warning d-inline-block">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            No text content available for AI analysis.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -167,30 +282,155 @@
 <!-- Copy to clipboard script -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Copy to clipboard functionality
         document.querySelectorAll('.copy-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                const text = btn.getAttribute('data-bullet');
-                navigator.clipboard.writeText(text);
-                btn.textContent = 'Copied!';
-                setTimeout(() => { btn.textContent = 'Copy'; }, 1200);
+                const text = this.getAttribute('data-text');
+                navigator.clipboard.writeText(text).then(function () {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="bi bi-check me-1"></i>Copied!';
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-success');
+
+                    setTimeout(function () {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-outline-primary');
+                    }, 2000);
+                }).catch(function (err) {
+                    console.error('Failed to copy text: ', err);
+                    alert('Failed to copy text to clipboard');
+                });
             });
         });
+
+        // Apply rewrite functionality
+        document.querySelectorAll('.apply-rewrite-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const rewriteItem = this.closest('.rewrite-item');
+                const textarea = rewriteItem.querySelector('.improved-textarea');
+                const improvedText = textarea.value;
+                const section = this.closest('.feedback-card').querySelector('h5').textContent.toLowerCase().replace(/\s+/g, '_');
+
+                // Show loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Applying...';
+                this.disabled = true;
+
+                // Create form data
+                const formData = new FormData();
+                formData.append('section', section);
+                formData.append('improved_text', improvedText);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+                // Send to backend
+                fetch(`/resumes/{{ resume.pk }}/apply-rewrite/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.innerHTML = '<i class="bi bi-check me-1"></i>Applied!';
+                            this.classList.remove('btn-success');
+                            this.classList.add('btn-primary');
+
+                            // Show success message
+                            const successAlert = document.createElement('div');
+                            successAlert.className = 'alert alert-success alert-dismissible fade show';
+                            successAlert.innerHTML = `
+                            <i class="bi bi-check-circle me-2"></i>${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                            document.querySelector('.container-fluid').insertBefore(successAlert, document.querySelector('.container-fluid').firstChild);
+
+                            setTimeout(() => {
+                                btn.innerHTML = originalText;
+                                btn.classList.remove('btn-primary');
+                                btn.classList.add('btn-success');
+                                btn.disabled = false;
+                            }, 2000);
+                        } else {
+                            throw new Error(data.error || 'Failed to apply rewrite');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.innerHTML = '<i class="bi bi-x-circle me-1"></i>Error';
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-danger');
+
+                        // Show error message
+                        const errorAlert = document.createElement('div');
+                        errorAlert.className = 'alert alert-danger alert-dismissible fade show';
+                        errorAlert.innerHTML = `
+                        <i class="bi bi-exclamation-triangle me-2"></i>Failed to apply rewrite: ${error.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                        document.querySelector('.container-fluid').insertBefore(errorAlert, document.querySelector('.container-fluid').firstChild);
+
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.classList.remove('btn-danger');
+                            btn.classList.add('btn-success');
+                            btn.disabled = false;
+                        }, 3000);
+                    });
+            });
+        });
+
+        // Reset functionality
+        document.querySelectorAll('.reset-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const rewriteItem = this.closest('.rewrite-item');
+                const textarea = rewriteItem.querySelector('.improved-textarea');
+                const originalText = textarea.getAttribute('data-original');
+
+                textarea.value = originalText;
+
+                // Show reset message
+                const originalBtnText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-check me-1"></i>Reset!';
+                this.classList.remove('btn-outline-secondary');
+                this.classList.add('btn-secondary');
+
+                setTimeout(function () {
+                    btn.innerHTML = originalBtnText;
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-outline-secondary');
+                }, 1000);
+            });
+        });
+
+        // Update copy button data when textarea changes
+        document.querySelectorAll('.improved-textarea').forEach(function (textarea) {
+            textarea.addEventListener('input', function () {
+                const rewriteItem = this.closest('.rewrite-item');
+                const copyBtn = rewriteItem.querySelector('.copy-btn');
+                copyBtn.setAttribute('data-text', this.value);
+            });
+        });
+
+        // Auto-scroll to AI analysis if there's a success message about AI
+        const messages = document.querySelectorAll('.alert-success');
+        let hasAIMessage = false;
+        messages.forEach(function (message) {
+            if (message.textContent.includes('AI') || message.textContent.includes('analyzed')) {
+                hasAIMessage = true;
+            }
+        });
+
+        if (hasAIMessage && document.getElementById('ai-analysis')) {
+            setTimeout(function () {
+                document.getElementById('ai-analysis').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 500);
+        }
     });
 </script>
-
-<style>
-    .accordion-button {
-        font-size: 1.1rem;
-    }
-
-    .list-group-item {
-        background: #f9f9f9;
-        border: none;
-        border-bottom: 1px solid #eee;
-    }
-
-    .improved-bullet {
-        font-weight: 500;
-    }
-</style>
 {% endblock %}

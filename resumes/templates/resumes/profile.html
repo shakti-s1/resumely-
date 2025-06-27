@@ -1,4 +1,5 @@
 {% extends "resumes/base.html" %}
+{% load custom_filters %}
 
 {% block title %}Profile - Resumely{% endblock %}
 
@@ -6,25 +7,25 @@
 <div class="container mt-5 slide-up">
     <div class="row justify-content-center">
         <div class="col-md-10 col-lg-8">
-            <div class="card profile-card">
+            <div class="card profile-card glass border-0 shadow-lg">
                 <div class="card-header text-center">
-                    <div class="profile-avatar mb-3">
+                    <div class="profile-avatar mb-3 mx-auto">
                         <i class="bi bi-person-circle"></i>
                     </div>
-                    <h2 class="mb-0">User Profile</h2>
+                    <h2 class="mb-0 text-gradient">User Profile</h2>
                     <p class="text-white-50 mb-0">Manage your account and view statistics</p>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="profile-section">
+                            <div class="profile-section glass p-4">
                                 <h5 class="section-title">
                                     <i class="bi bi-person me-2"></i>Account Information
                                 </h5>
                                 <div class="info-list">
                                     <div class="info-item">
                                         <span class="info-label">Username:</span>
-                                        <span class="info-value">{{ user.username }}</span>
+                                        <span class="info-value username-highlight">{{ user.username }}</span>
                                     </div>
                                     <div class="info-item">
                                         <span class="info-label">Email:</span>
@@ -36,14 +37,14 @@
                                     </div>
                                     <div class="info-item">
                                         <span class="info-label">Last Login:</span>
-                                        <span class="info-value">{% if user.last_login %}{{ user.last_login|date:"M d, Y
-                                            H:i" }}{% else %}Never{% endif %}</span>
+                                        <span class="info-value">{% if user.last_login|safe_boolean %}{{
+                                            user.last_login|date:"M d, Y H:i" }}{% else %}Never{% endif %}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="profile-section">
+                            <div class="profile-section glass p-4">
                                 <h5 class="section-title">
                                     <i class="bi bi-lightning me-2"></i>Quick Actions
                                 </h5>
@@ -70,7 +71,7 @@
                             </h5>
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <div class="stat-card text-center">
+                                    <div class="stat-card glass text-center">
                                         <div class="stat-icon mx-auto mb-2">
                                             <i class="bi bi-file-earmark-text"></i>
                                         </div>
@@ -81,7 +82,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="stat-card text-center">
+                                    <div class="stat-card glass text-center">
                                         <div class="stat-icon mx-auto mb-2">
                                             <i class="bi bi-check-circle"></i>
                                         </div>
@@ -93,7 +94,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="stat-card text-center">
+                                    <div class="stat-card glass text-center">
                                         <div class="stat-icon mx-auto mb-2">
                                             <i class="bi bi-calendar3"></i>
                                         </div>
@@ -226,6 +227,13 @@
         color: var(--text-secondary);
         margin: 0;
         font-size: 0.875rem;
+    }
+
+    .username-highlight {
+        color: #2563eb !important;
+        /* Strong blue for visibility */
+        font-weight: 700;
+        letter-spacing: 0.5px;
     }
 </style>
 {% endblock %}

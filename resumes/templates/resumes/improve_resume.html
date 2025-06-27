@@ -1,0 +1,358 @@
+{% extends "resumes/base.html" %}
+{% load custom_filters %}
+
+{% block title %}AI Resume Coach - {{ resume.title }}{% endblock %}
+
+{% block content %}
+<div class="ai-coach-container">
+    <!-- Header -->
+    <div class="coach-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'resume_list' %}">My Resumes</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'resume_detail' resume.pk %}">{{ resume.title
+                                    }}</a></li>
+                            <li class="breadcrumb-item active">AI Coach</li>
+                        </ol>
+                    </nav>
+                    <h1 class="coach-title">
+                        <i class="bi bi-robot text-primary me-3"></i>
+                        AI Resume Coach
+                    </h1>
+                    <p class="coach-subtitle">Professional insights and improvements for your resume</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="stat-number">{{ sections|length }}</span>
+                            <span class="stat-label">Sections</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="container">
+        {% if resume.ai_feedback %}
+        <div class="sections-container">
+            {% for section in sections %}
+            {% with feedback=resume.ai_feedback|get_item:section %}
+            <div class="section-card" id="section-{{ section }}">
+                <div class="section-header">
+                    <h3><i class="bi bi-file-text me-2"></i>{{ section|title }}</h3>
+                </div>
+
+                {% if feedback %}
+                <div class="section-content">
+                    <!-- Original -->
+                    {% if feedback.original_text %}
+                    <div class="content-block">
+                        <h5>Original Content</h5>
+                        <p>{{ feedback.original_text }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Feedback -->
+                    {% if feedback.feedback %}
+                    <div class="content-block">
+                        <h5>AI Analysis</h5>
+                        <div class="feedback-content">{{ feedback.feedback|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Rewrites -->
+                    {% if feedback.rewrites %}
+                    <div class="content-block">
+                        <h5>AI Improvements</h5>
+                        {% for rewrite in feedback.rewrites %}
+                        <div class="rewrite-item">
+                            <div class="rewrite-header">
+                                <span>Improved Version {{ forloop.counter }}</span>
+                                <div class="actions">
+                                    <button class="btn btn-sm btn-outline-primary copy-btn"
+                                        data-text="{{ rewrite.improved }}">
+                                        Copy
+                                    </button>
+                                    <button class="btn btn-sm btn-success apply-btn" data-section="{{ section }}"
+                                        data-text="{{ rewrite.improved }}">
+                                        Apply
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="improved-text">{{ rewrite.improved }}</p>
+                            {% if rewrite.explanation %}
+                            <small class="explanation">{{ rewrite.explanation }}</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <p>No feedback available for this section.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-ai-state">
+            <div class="text-center">
+                <i class="bi bi-robot fs-1 text-muted mb-3"></i>
+                <h4>No AI Analysis Available</h4>
+                <p>Generate professional insights for your resume.</p>
+                <a href="{% url 'regenerate_ai_feedback' resume.pk %}" class="btn btn-primary">
+                    Generate AI Analysis
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .ai-coach-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .coach-header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+    }
+
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+    }
+
+    .breadcrumb-item.active {
+        color: white;
+    }
+
+    .coach-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .coach-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .stats {
+        display: flex;
+        gap: 2rem;
+        justify-content: flex-end;
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    .section-content {
+        padding: 0;
+    }
+
+    .content-block {
+        padding: 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .content-block:last-child {
+        border-bottom: none;
+    }
+
+    .content-block h5 {
+        color: #475569;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .rewrite-item {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .rewrite-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .improved-text {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0 0 0.75rem 0;
+        border: 1px solid #e2e8f0;
+    }
+
+    .explanation {
+        color: #64748b;
+        font-style: italic;
+    }
+
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .empty-ai-state {
+        background: white;
+        border-radius: 16px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .coach-header {
+            padding: 1.5rem;
+        }
+
+        .coach-title {
+            font-size: 2rem;
+        }
+
+        .stats {
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .rewrite-header {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Apply functionality
+        document.querySelectorAll('.apply-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const section = this.getAttribute('data-section');
+                const improvedText = this.getAttribute('data-text');
+
+                this.innerHTML = 'Applying...';
+                this.disabled = true;
+
+                const formData = new FormData();
+                formData.append('section', section);
+                formData.append('improved_text', improvedText);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+                fetch(`/resumes/{{ resume.pk }}/apply-rewrite/`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.innerHTML = 'Applied!';
+                            this.classList.remove('btn-success');
+                            this.classList.add('btn-primary');
+                        } else {
+                            throw new Error(data.error || 'Failed to apply');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.innerHTML = 'Error';
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-danger');
+                    });
+            });
+        });
+
+        // Copy functionality
+        document.querySelectorAll('.copy-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const text = this.getAttribute('data-text');
+                navigator.clipboard.writeText(text).then(function () {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = 'Copied!';
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-success');
+
+                    setTimeout(function () {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-outline-primary');
+                    }, 2000);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

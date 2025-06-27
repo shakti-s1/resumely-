@@ -6,6 +6,8 @@ class Resume(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='resumes')
     title = models.CharField(max_length=255)
+    description = models.TextField(
+        blank=True, null=True, help_text="Optional description or notes about this resume")
     document = models.FileField(upload_to='resumes/')
     text_content = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

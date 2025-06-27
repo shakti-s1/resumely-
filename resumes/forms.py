@@ -5,11 +5,23 @@ from django.contrib.auth.models import User
 
 
 class ResumeForm(forms.ModelForm):
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Add notes about this resume version or target position...',
+            'class': 'form-control',
+            'style': 'resize: vertical; min-height: 80px;'
+        }),
+        required=False,
+        help_text='Add notes about this resume version or target position (optional).'
+    )
+
     class Meta:
         model = Resume
-        fields = ['title', 'document']
+        fields = ['title', 'description', 'document']
         labels = {
             'title': 'Resume Name',
+            'description': 'Description',
             'document': 'Resume File',
         }
         help_texts = {
@@ -22,17 +34,18 @@ class ResumeForm(forms.ModelForm):
         if document:
             # 1. File size validation (e.g., 5MB max)
             max_size = 5 * 1024 * 1024  # 5 MB in bytes
-            if document.size > max_size:
+            if hasattr(document, 'size') and document.size > max_size:
                 raise forms.ValidationError("File size must be under 5MB.")
 
-            # 2. File type validation
-            allowed_types = [
-                'application/pdf',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            ]
-            if document.content_type not in allowed_types:
-                raise forms.ValidationError(
-                    "Only PDF and DOCX files are allowed.")
+            # 2. File type validation (only for new uploads)
+            if hasattr(document, 'content_type'):
+                allowed_types = [
+                    'application/pdf',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                ]
+                if document.content_type not in allowed_types:
+                    raise forms.ValidationError(
+                        "Only PDF and DOCX files are allowed.")
         return document
 
 
